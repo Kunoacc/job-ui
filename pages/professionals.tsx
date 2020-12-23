@@ -11,9 +11,9 @@ import { useEffect, useState } from "react"
 
 export default function Professionals() {
 
-  const { push, query, pathname } = useRouter()
+  const { push, query, pathname, asPath, route } = useRouter()
 
-  const [ search, setSearch ] = useState('')
+  const [ search, setSearch ] = useState(query?.q as string)
   const handleSearchUpdate = (s: string) => setSearch(s)
   
   const [ offset, setOffset ] = useState(0)
@@ -21,16 +21,16 @@ export default function Professionals() {
 
   const [ fetchKey, setFetchKey ] = useState(v1())
   const handleFetchKeyUpdate = () => setFetchKey(v1())
-  
-  useEffect(() => {
-    console.log(query)
-    // handleSearchUpdate(query?.q as string)
-  }, [])
 
   useEffect(() => {
-    push(`${pathname}?q=${encodeURI(search)}`)
-    handleFetchKeyUpdate()
+    if (search) {
+      push(`${pathname}?q=${encodeURI(search)}`, undefined , { shallow: true })
+    }
   }, [search])
+
+  useEffect(() => {
+    handleFetchKeyUpdate()
+  }, [query?.q])
 
   const { data, error } = useSWR(query?.q ? fetchKey : null, () => api.searchPerson(search, offset as unknown as string))
   
@@ -69,12 +69,11 @@ export default function Professionals() {
         <div className="container mx-auto -mt-16 flex flex-col">
           <input placeholder="Search here..."
             className="border-b-2 border-t border-r border-l border-gray-300 focus:border-teal-500 focus:ring-teal-500 outline-none text-2xl p-3 rounded transition-all ease-in duration-150 placeholder-gray-300 mt-10 w-5/6 md:w-3/4 lg:w-2/3 mx-auto" 
-            onChange={e => handleSearchUpdate(e.target.value)}
-            value={search}/>
+            onChange={e => handleSearchUpdate(e.target.value)}/>
 
           {search ? 
-          (<ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 w-full">
-            {data?.results?.map((person) => <li className="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200" key={v1()}>
+           data?.results.length > 0 && (<ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 w-full">
+            {data.results.map((person) => <li className="col-span-1 flex flex-col text-center bg-white rounded-lg shadow divide-y divide-gray-200" key={v1()}>
               <div className="flex-1 flex flex-col p-8">
                 <img className="w-32 h-32 flex-shrink-0 mx-auto bg-black rounded-full"
                   src={person.picture ?? `https://www.gravatar.com/avatar/${encodeURIComponent(person.username)}?d=identicon`}
@@ -102,8 +101,8 @@ export default function Professionals() {
                   </div>
                 </div>
               </div>
-            </li>)}
-          </ul>) : 
+            </li>) }
+          </ul>)  || data?.results.length < 1 && <h2 className="text-3xl text-gray-500 py-20 text-center">No search results for <b>"{search}"</b></h2>: 
           
           (
             <h2 className="text-5xl font-semibold text-gray-500 py-20 text-center">Search to get started</h2>

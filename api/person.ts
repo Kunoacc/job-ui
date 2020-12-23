@@ -6,10 +6,8 @@ export default {
   async getPerson(userId: string): Promise<Person>{
     try {
       const response = await get<Person>(`person/${userId}`)
-      console.log(response)
       return response?.parsedBody
     } catch (error) {
-      console.log(error)
       throw new ApiRequestError(error)
     }
   },
@@ -19,8 +17,10 @@ export default {
       const response = await post<Person, {
         userId: string
       }>(`person`, { userId })
+      console.log(response)
       return response?.parsedBody
     } catch (error) {
+      console.error(error)
       throw new ApiRequestError(error)
     }
   }

@@ -49,7 +49,7 @@ export interface PersonResult {
 export interface PersonSearchApiResponse {
     aggregators: Aggregators;
     offset: number;
-    results: PersonResult[] | [];
+    results: PersonResult[];
     size: number;
     total: number;
 }

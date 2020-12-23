@@ -12,8 +12,11 @@ export async function http<T>(
   response.parsedBody = await response.json();
 
   if (!response.ok) {
+    console.log(response)
     throw response.parsedBody
   }
+
+  console.log(response)
 
   return response;
 }
