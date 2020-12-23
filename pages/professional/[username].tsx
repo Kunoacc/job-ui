@@ -94,7 +94,7 @@ export default function UserDetail({ user }: {
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
                 <p className="text-sm font-medium text-gray-500">{user.headline}</p>
-                <p className="text-sm font-medium text-gray-500 inline-flex items-center"><FaWeightHanging className="text-sm mr-2"></FaWeightHanging> &bull; { parseInt(user.profileWeight)} </p>
+                <p className="text-sm font-medium text-gray-500 inline-flex items-center"><FaWeightHanging className="text-sm mr-2"></FaWeightHanging> &bull; { parseInt(user.profileWeight as string)} </p>
               </div>
             </div>
           </div>
@@ -255,7 +255,7 @@ export default function UserDetail({ user }: {
                           {
                             user.skills.map(skill => 
                             <span className="inline-flex w-max items-center px-4 py-0.5 rounded-full text-sm font-medium bg-teal-100 text-teal-800 my-2 mx-2">
-                              {skill.skill.name} &bull;  {parseInt(skill.skillWeight)} <FaWeightHanging className="text-xs ml-2"/>
+                              {skill.skill.name} &bull;  {parseInt(skill.skillWeight as string)} <FaWeightHanging className="text-xs ml-2"/>
                             </span>
                             )
                           }

@@ -78,7 +78,6 @@ export default function Professionals() {
               <div className="flex-1 flex flex-col p-8">
                 <img className="w-32 h-32 flex-shrink-0 mx-auto bg-black rounded-full"
                   src={person.picture ?? `https://www.gravatar.com/avatar/${encodeURIComponent(person.username)}?d=identicon`}
-                  layout="fill"
                   alt="" />
                 <h3 className="mt-6 text-gray-900 text-sm font-medium">{person.name}</h3>
                 <dl className="mt-1 flex-grow flex flex-col justify-between">
