@@ -2,6 +2,7 @@ import { OpportunityResult } from "../../interfaces/search.interface";
 import Link from "next/link";
 import { v1 } from "uuid";
 import { motion } from "framer-motion";
+import { numberFormat } from "../../utils";
 
 const variants = {
   open: {
@@ -23,7 +24,6 @@ const variants = {
 export default function OpportunityCard({ opportunity }: { opportunity: OpportunityResult}) {
   const deadline = new Date(opportunity?.deadline?.toString())
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-  const numberFormat = (number: number) => Intl.NumberFormat('en').format(number)
 
   return (
     <motion.li 

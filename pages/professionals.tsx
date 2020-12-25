@@ -9,14 +9,22 @@ import { NextPageContext } from "next"
 import PersonCard from "../components/PersonCard"
 import PersonLoader from "../components/Loaders/PersonLoader"
 import { PersonResult } from "../interfaces/search.interface"
-import { AnimatePresence, motion, useViewportScroll } from "framer-motion"
-import { createStandaloneToast, Spinner } from "@chakra-ui/react"
+import { motion, useViewportScroll } from "framer-motion"
+import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spinner, useBreakpointValue, useDisclosure } from "@chakra-ui/react"
 import Link from "next/link"
-import AsyncSelect from 'react-select/async'
+import AsyncSelect from "react-select/async"
+import { debounce, useToast } from "../utils"
 
+enum IsFirstLoad { 
+  yes = "yes",
+  no  = "no",
+  //@ts-ignore
+  notSet = null 
+}
 export default function Professionals({ initialQuery }) {
 
   const { push, query, pathname } = useRouter()
+  const { onClose, onOpen, isOpen } = useDisclosure()
 
   const [ search, setSearch ] = useState(initialQuery?.q ?? query?.q)
   const handleSearchUpdate = (s: string) => setSearch(s)
@@ -27,16 +35,23 @@ export default function Professionals({ initialQuery }) {
   const [ total, setTotal ] = useState(0)
   const handleTotalUpdate = (s: number) => setTotal(s)
 
-  const [ skills, setSkills ] = useState(decodeURI(initialQuery?.filter ?? query?.filter) || [])
-  const handleSkillsUpdate = (skill: []) => setSkills(skill)
-  
+  const [ filters, setFilters ] = useState((initialQuery?.skills ?? query?.skills)?.split(',') || [])
+  const handleFiltersSet = (event: any) => {
+    setFilters(event?.map((x: any) => x.value) || [])
+  }
+  const getFilterOptions = (input: string) => new Promise(async (resolve) => {
+    const response = await api.loadFilterOptions(input)
+    return resolve(response.map(filter => ({
+      label: filter.term,
+      value: filter.term
+    })))
+  })
+
   const [ offset, setOffset ] = useState(0)
   const handleOffsetUpdate = (s: number) => setOffset(s)
 
   const [ fetchKey, setFetchKey ] = useState(v1())
   const handleFetchKeyUpdate = () => setFetchKey(v1())
-
-  const useToast = createStandaloneToast()
 
   const [ checkBoxState, setCheckBoxState ] = useState([])
   const updateCheckBoxState = (event: ChangeEvent<HTMLInputElement>) => {
@@ -59,25 +74,14 @@ export default function Professionals({ initialQuery }) {
     }
   }
 
-  const [ filters, setFilters ] = useState([] as string[])
-  const getFilterOptions = (input: string) => new Promise(async (resolve) => {
-    const response = await api.loadFilterOptions(input)
-    return resolve(response.map(filter => ({
-      label: filter.term,
-      value: filter.term
-    })))
-  })
-
   useEffect(() => {
-    if (search) {
-      push(`${pathname}?q=${encodeURI(search)}${filters.length > 0 ? '&filter='+encodeURI(filters as unknown as string) : ``}`, undefined , { shallow: true })
-      setCheckBoxState([])
-    }
+    push(`${pathname}${search ? `?q=${encodeURI(search)}` : ``}${filters.length > 0 ? `${search ? `&` : `?`}skills=`+encodeURI(filters as unknown as string) : ``}`, undefined , { shallow: true })
+    setCheckBoxState([])
   }, [search])
 
   useEffect(() => {
     handleFetchKeyUpdate()
-  }, [query?.q])
+  }, [query?.q, query?.skills])
 
   const { scrollYProgress } = useViewportScroll()
   const [ shouldPadCompare, setShouldPadCompare ] = useState(false)
@@ -86,9 +90,7 @@ export default function Professionals({ initialQuery }) {
     setShouldPadCompare(val > 0.95)
   })
 
-  
-
-  const { error, data: apiData, setSize, size } = useSWRInfinite( index => query?.q ? `${fetchKey}/${index}` : null,
+  const { error, data: apiData, setSize, size } = useSWRInfinite( index => query?.q || filters.length > 0 ? `${fetchKey}/${index}` : null,
     (offset: string) => api.searchPerson(search, (parseInt(offset.split('/')[1]) * 10).toString(), filters),
     {
       onSuccess(data, key){
@@ -104,23 +106,35 @@ export default function Professionals({ initialQuery }) {
   )
 
   useEffect(() => {
-    console.log(filters)
-    push(`${pathname}${search ? '?q=' + encodeURI(search) : ''}${filters.length > 0 ? `${search ? `&` : `?`}filter=`+encodeURI(filters as unknown as string) : ``}`, undefined , { shallow: true })
-    if (search) {
-      handleFetchKeyUpdate()
-    }
+    push(`${pathname}${search ? '?q=' + encodeURI(search) : ''}${filters.length > 0 ? `${search ? `&` : `?`}skills=`+encodeURI(filters as unknown as string) : ``}`, undefined , { shallow: true })
+    setCheckBoxState([])
   }, [filters])
 
-  const handleFiltersSet = (event: any) => {
-    setFilters(event?.map((x: any) => x.value) || [])
-  }
+  const [ isFirstLoad, setIsFirstLoad ] = useState(null)
+  const isMobile = useBreakpointValue({ base: true, md: false})
+  useEffect(() => {
+    const loadLocalValue = localStorage.getItem('isFirstLoad')
+
+    // @ts-ignore
+    if (loadLocalValue === IsFirstLoad.notSet) {
+      setIsFirstLoad(IsFirstLoad.yes)
+    }
+
+    if (loadLocalValue === IsFirstLoad.yes) {
+      setIsFirstLoad(IsFirstLoad.no)
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("isFirstLoad", isFirstLoad)
+  }, [isFirstLoad])
   
   return (
     <Layout>
-      <div className="bg-gray-100 min-h-screen flex flex-col">
+      <div className="bg-gray-100 min-h-screen flex flex-col text-center lg:text-left">
         <Menu className="bg-white pb-2" />
         <div className="bg-teal-700">
-          <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 lg:flex lg:justify-between flex items-center">
+          <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 lg:flex lg:justify-between flex flex-col lg:flex-row items-center">
             <div className="max-w-xl">
               <h2 className="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl">Professionals
               </h2>
@@ -129,7 +143,12 @@ export default function Professionals({ initialQuery }) {
             </div>
             <div className="w-full max-w-xs">
               <div className="flex-shrink-0 mt-10 lg:mt-0">
-                <AsyncSelect isMulti cacheOptions defaultOptions={filters} loadOptions={getFilterOptions} onChange={handleFiltersSet}></AsyncSelect>
+                <AsyncSelect isMulti cacheOptions 
+                  loadOptions={getFilterOptions} 
+                  onChange={handleFiltersSet} 
+                  defaultValue={filters.map(filter => ({label: filter, value: filter}))} 
+                  defaultOptions={filters.map(filter => ({label: filter, value: filter}))}
+                  placeholder="Select skill..."></AsyncSelect>
               </div>
             </div>
           </div>
@@ -140,7 +159,7 @@ export default function Professionals({ initialQuery }) {
             onChange={e => handleSearchUpdate(e.target.value)}
             value={search}/>
 
-          {search ? 
+          {search || filters.length > 0 ? 
             apiData && data?.length > 0 && 
            (<motion.ul variants={
              {
@@ -151,7 +170,7 @@ export default function Professionals({ initialQuery }) {
                 transition: { staggerChildren: 0.05, staggerDirection: -1 }
               }
              }
-           } className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 w-full">
+           } className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 w-full px-2 lg:px-0">
 
             {data.map((person) => <PersonCard person={person} checkBoxState={checkBoxState} toggleCheckBoxState={updateCheckBoxState} key={v1()}></PersonCard>) }
 
@@ -163,9 +182,9 @@ export default function Professionals({ initialQuery }) {
           || 
           apiData && data?.length < 1 && <h2 className="text-3xl text-gray-500 py-20 text-center">No search results for <b>"{search}"</b></h2>
           : 
-          (<h2 className="text-5xl font-semibold text-gray-500 py-20 text-center">Search to get started</h2>)}
+          (<h2 className="text-5xl font-semibold text-gray-500 py-20 text-center">Search or select skill to get started</h2>)}
           {
-            search && !apiData && <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 w-full">
+            (search || filters.length > 0 ) && !apiData && <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 my-10 w-full px-2 lg:px-0">
             <PersonLoader></PersonLoader>
             <PersonLoader></PersonLoader>
             <PersonLoader></PersonLoader>
@@ -173,7 +192,7 @@ export default function Professionals({ initialQuery }) {
           </ul>
           }
         </div>
-        {search && apiData && (<><p className="text-center mx-auto text-gray-500">viewing {data.length} of {total} results</p>
+        {(search || filters.length > 0) && apiData && (<><p className="text-center mx-auto text-gray-500">viewing {data.length} of {total} results</p>
         <button onClick={e => setSize(size + 1)}
           disabled={data.length >= total}
           className={`my-5 py-3 px-5 bg-teal-500 border-b-2 rounded-2 border-teal-700 text-white hover:bg-teal-600 hover:border-teal-900 transition-colors ease duration-150 container mx-auto text-center ${data.length < total || 'opacity-50 cursor-not-allowed'}`}>Load More </button>
@@ -181,8 +200,24 @@ export default function Professionals({ initialQuery }) {
         <div className="w-full py-1"></div>
       </div>
 
-      {checkBoxState.length > 0 && <Link href={{
-          pathname: checkBoxState.length > 1 ? `/compare/${checkBoxState[0]}/${checkBoxState[1]}` : pathname + '?q=' + query?.q,
+      {checkBoxState.length > 0 && checkBoxState.length < 2 && 
+        <a
+          key={v1()}
+          onClick={e => useToast({
+            title: 'Yikes',
+            description: `You have to select 2 users to compare`,
+            status: 'info',
+            duration: 5000,
+            isClosable: true,
+            position: 'top-right'
+          })}
+          className={`fixed ${shouldPadCompare ? 'bottom-24' : 'bottom-5'} w-max right-12 my-5 py-3 px-5 bg-teal-500 border-b-2 rounded-2 border-teal-700 text-white hover:bg-teal-600 hover:border-teal-900 transition-colors ease duration-150 container mx-auto text-center ${checkBoxState.length > 0 && checkBoxState.length === 2 || 'opacity-50 cursor-not-allowed'}`}>
+          Compare users
+        </a>
+      }
+      
+      {checkBoxState.length > 1 && <Link href={{
+          pathname: checkBoxState.length > 1 ? `/compare/${checkBoxState[0]}/${checkBoxState[1]}` : pathname + `${search ? '?q=' + encodeURI(search) : ''}${filters.length > 0 ? `${search ? `&` : `?`}skills=`+encodeURI(filters as unknown as string) : ``}`,
           query: checkBoxState.length > 1 ? {q: encodeURI(filters as unknown as string)} : {}
           }}>
           <a
@@ -192,11 +227,26 @@ export default function Professionals({ initialQuery }) {
           </a>
       </Link>}
       
+      <Modal isOpen={isFirstLoad === IsFirstLoad.yes} onClose={onClose}>
+        <ModalOverlay/>
+        <ModalContent>
+          <ModalHeader>Heads Up!</ModalHeader>
+          <ModalBody>
+            You can compare professionals! {isMobile ? `use the checkboxes on the top right of each user's card to begin.` : `hover over a user to reveal the checkboxes. use the checkboxes to begin`}
+          </ModalBody>
+          <ModalFooter>
+          <button
+          onClick={e => setIsFirstLoad(IsFirstLoad.no)}
+            className="w-max mx-auto rounded-md right-12 py-3 px-5 bg-teal-500 border-b-2 rounded-2 border-teal-700 text-white hover:bg-teal-600 hover:border-teal-900 transition-colors ease duration-150 text-center">
+            Got It!
+          </button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Layout>
   )
 }
 
 Professionals.getInitialProps= async ({ query }: NextPageContext) => {
-  console.log(query)
   return { initialQuery: query }
 }

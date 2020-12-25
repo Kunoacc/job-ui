@@ -1,7 +1,7 @@
 import Layout from "../../components/Layout"
 import Menu from "../../components/Menu"
 import Link from "next/link"
-import { GetServerSideProps, NextPageContext } from "next"
+import { GetServerSideProps } from "next"
 import { Spinner } from "@chakra-ui/react"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
@@ -9,6 +9,7 @@ import { v1 } from "uuid"
 import { ComparePeople, PeopleComparisonData } from "../../interfaces/compare.interface"
 import useSWR from "swr"
 import api from "../../api"
+import { numberFormat } from "../../utils"
 
 export default function ComparePage({ first, second, query: initialQuery }: {
   first: string,
@@ -24,8 +25,6 @@ export default function ComparePage({ first, second, query: initialQuery }: {
   const [ persons, setPersons ] = useState(null as ComparePeople)
   const [ preferredPerson, setPreferredPerson ] = useState(null as PeopleComparisonData)
   const [ otherPerson, setOtherPerson ] = useState(null as PeopleComparisonData)
-
-  const numberFormat = (number: number) => Intl.NumberFormat('en').format(number)
 
   const { data, error } = useSWR( fetchKey, () => api.compareUsers({ first, second }, query?.q as string[]), {
     onSuccess(data, key) {

@@ -10,16 +10,15 @@ import { v1 } from "uuid";
 import { useRouter } from "next/router";
 import { Spinner } from "@chakra-ui/react";
 import { Opportunity } from "../../interfaces/opportunity.interface";
+import { numberFormat } from "../../utils";
 
 export default function OpportunityDetails({ opportunity }: {
   opportunity?: Opportunity,
 }){
-  const { query } = useRouter()
+  const { query, back } = useRouter()
   const [ fetchKey, setFetchKey ] = useState(v1())
   const [ job, setJob ] = useState(opportunity)
   const [ jobNotGenerated, setJobNotGenerated ] = useState(!opportunity)
-
-  const numberFormat = (number: number) => Intl.NumberFormat('en').format(number)
 
   const { data, error } = useSWR( jobNotGenerated ? fetchKey : null, () => api.createOpportunity(query?.id as string), {
     onSuccess(data, key){
@@ -44,9 +43,9 @@ export default function OpportunityDetails({ opportunity }: {
             <div className="border-t border-gray-200 py-3">
               <nav className="flex" aria-label="Breadcrumb">
                 <div className="flex sm:hidden">
-                  <Link href="/opportunities">
                   <a
-                    className="group inline-flex space-x-3 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    onClick={e => back()}
+                    className="group inline-flex space-x-3 text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer">
                     {/* Heroicon name: arrow-narrow-left */}
                     <svg className="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-600"
                       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -56,7 +55,6 @@ export default function OpportunityDetails({ opportunity }: {
                     </svg>
                     <span>Back to Opportunities</span>
                   </a>
-                  </Link>
                 </div>
                 <div className="hidden sm:block">
                   <ol className="flex items-center space-x-4">
@@ -159,17 +157,17 @@ export default function OpportunityDetails({ opportunity }: {
                   <p className="text-sm font-semibold capitalize text-gray-500">About {job?.company?.name}</p>
                   {job?.members && <div className="flex-shrink-0 sm:mt-0">
                     <div className="flex overflow-hidden">
-                      {(JSON.parse(job.members)).map(member => member?.person?.picture ? <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src={member?.person?.pictureThumbnail} alt="" /> : <></>)}
+                      {(JSON.parse(job.members)).map(member => member?.person?.picture ? <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src={member?.person?.pictureThumbnail} alt="" key={v1()} /> : <></>)}
                     </div>
                   </div>}
                 </div>
-                {(job.company?.profile?.summary ?? job.company?.profile?.culture ?? '').split('\n').map(info => <p className="text-sm py-1 leading-snug">{info}</p>)}
+                {(job.company?.profile?.summary ?? job.company?.profile?.culture ?? '').split('\n').map(info => <p className="text-sm py-1 leading-snug" key={v1()}>{info}</p>)}
               </div>}
             </div>
           </div>
 
           <div
-            className="max-w-3xl mx-auto grid grid-cols-1 gap-6 lg:max-w-7xl sm:px-6 lg:px-8 mt-6">
+            className="max-w-3xl mx-auto grid grid-cols-1 gap-6 lg:max-w-7xl px-4 sm:px-6 lg:px-8 mt-6">
             <div className="space-y-6 w-full">
               {/* Description list*/}
               <section aria-labelledby="applicant-information-title">
@@ -180,7 +178,7 @@ export default function OpportunityDetails({ opportunity }: {
                         Responsibilities
                       </dt>
                       <dd className="mt-1 text-sm text-gray-900">
-                        {job.responsibilities.split('\n').map(content => <p className="py-1 leading-snug">{content}</p>)}
+                        {job.responsibilities.split('\n').map(content => <p className="py-1 leading-snug" key={v1()}>{content}</p>)}
                       </dd>
                     </div>}
                     

@@ -2,7 +2,8 @@ import { PersonResult } from "../../interfaces/search.interface";
 import Link from "next/link";
 import { v1 } from "uuid";
 import { AnimatePresence, motion } from "framer-motion";
-import { Dispatch, useState } from "react";
+import { Dispatch, useEffect, useState } from "react";
+import { useBreakpointValue } from "@chakra-ui/react";
 
 const variants = {
   open: {
@@ -28,7 +29,12 @@ export default function PersonCard({ person, checkBoxState, toggleCheckBoxState 
     toggleCheckBoxState: Dispatch<any>
   }) {
 
-  const [ isCheckBoxVisible, setIsCheckBoxVisible ] = useState(false)
+  const variant = useBreakpointValue({ base: true, md: false})
+  const [ isCheckBoxVisible, setIsCheckBoxVisible ] = useState(variant)
+
+  useEffect(() => {
+    setIsCheckBoxVisible(variant)
+  }, [variant])
 
   return (
     <motion.li

@@ -11,11 +11,12 @@ import { useState } from "react";
 import { v1 } from "uuid";
 import { useRouter } from "next/router";
 import { Spinner } from "@chakra-ui/react";
+import { numberFormat } from "../../utils";
 
 export default function UserDetail({ user }: {
   user?: Person,
 }){
-  const { query } = useRouter()
+  const { query, back } = useRouter()
   const [ fetchKey, setFetchKey ] = useState(v1())
   const [ person, setPerson ] = useState(user)
   const [ userNotGenerated, setUserNotGenerated ] = useState(!user)
@@ -26,8 +27,6 @@ export default function UserDetail({ user }: {
       setUserNotGenerated(!userNotGenerated)
     }
   })
-
-  const numberFormat = (number: number) => Intl.NumberFormat('en').format(number)
 
   if (userNotGenerated && !data && !error) return <Generating></Generating>
 
@@ -42,9 +41,9 @@ export default function UserDetail({ user }: {
             <div className="border-t border-gray-200 py-3">
               <nav className="flex" aria-label="Breadcrumb">
                 <div className="flex sm:hidden">
-                  <Link href="/professionals">
                   <a
-                    className="group inline-flex space-x-3 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    onClick={e => back()}
+                    className="group inline-flex space-x-3 text-sm font-medium text-gray-500 hover:text-gray-700 cursor-pointer">
                     {/* Heroicon name: arrow-narrow-left */}
                     <svg className="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-600"
                       xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -54,7 +53,6 @@ export default function UserDetail({ user }: {
                     </svg>
                     <span>Back to Professionals</span>
                   </a>
-                  </Link>
                 </div>
                 <div className="hidden sm:block">
                   <ol className="flex items-center space-x-4">
@@ -123,7 +121,7 @@ export default function UserDetail({ user }: {
             </div>
           </div>
           <div
-            className="mt-8 max-w-3xl mx-auto grid grid-cols-1 gap-6 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-3">
+            className="mt-8 max-w-3xl mx-auto grid grid-cols-1 gap-6 sm:px-6 lg:max-w-7xl lg:grid-flow-col-dense lg:grid-cols-3 px-4">
             <div className="space-y-6 lg:col-start-1 lg:col-span-2">
               {/* Description list*/}
               <section aria-labelledby="applicant-information-title">

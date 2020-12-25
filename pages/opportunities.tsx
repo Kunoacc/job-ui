@@ -12,6 +12,7 @@ import { motion } from "framer-motion"
 import { Spinner } from "@chakra-ui/react"
 import OpportunityCard from "../components/OpportunityCard"
 import OpportunityLoader from "../components/Loaders/OpportunityLoader"
+import { debounce } from "../utils"
 
 export default function Opportunities({ initialQuery }) {
 
@@ -59,7 +60,7 @@ export default function Opportunities({ initialQuery }) {
   
   return (
     <Layout>
-      <div className="bg-gray-100 min-h-screen flex flex-col">
+      <div className="bg-gray-100 min-h-screen flex flex-col text-center lg:text-left">
         <Menu className="bg-white pb-2" />
           <div className="bg-teal-700">
             <div className="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8 lg:flex lg:justify-between">
@@ -87,7 +88,7 @@ export default function Opportunities({ initialQuery }) {
                 transition: { staggerChildren: 0.05, staggerDirection: -1 }
               }
              }
-           } className="divide-y divide-gray-200 grid grid-cols-1 gap-y-6 my-10">
+           } className="divide-y divide-gray-200 grid grid-cols-1 gap-y-6 my-10 px-2 lg:px-0">
 
             {data.map((opportunity) => <OpportunityCard opportunity={opportunity} key={v1()}></OpportunityCard>) }
 
@@ -101,7 +102,7 @@ export default function Opportunities({ initialQuery }) {
           : 
           (<h2 className="text-5xl font-semibold text-gray-500 py-20 text-center">Search to get started</h2>)}
           {
-            search && !apiData && <ul className="divide-y divide-gray-200 grid grid-cols-1 gap-y-6 my-10">
+            search && !apiData && <ul className="divide-y divide-gray-200 grid grid-cols-1 gap-y-6 my-10 px-2 lg:px-0">
             <OpportunityLoader></OpportunityLoader>
             <OpportunityLoader></OpportunityLoader>
             <OpportunityLoader></OpportunityLoader>
