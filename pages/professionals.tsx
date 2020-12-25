@@ -59,7 +59,7 @@ export default function Professionals({ initialQuery }) {
     }
   }
 
-  const [ filters, setFilters ] = useState(null as any)
+  const [ filters, setFilters ] = useState([] as string[])
   const getFilterOptions = (input: string) => new Promise(async (resolve) => {
     const response = await api.loadFilterOptions(input)
     return resolve(response.map(filter => ({
@@ -70,7 +70,7 @@ export default function Professionals({ initialQuery }) {
 
   useEffect(() => {
     if (search) {
-      push(`${pathname}?q=${encodeURI(search)}${filters.length > 0 ? '&filter='+encodeURI(filters) : ``}`, undefined , { shallow: true })
+      push(`${pathname}?q=${encodeURI(search)}${filters.length > 0 ? '&filter='+encodeURI(filters as unknown as string) : ``}`, undefined , { shallow: true })
       setCheckBoxState([])
     }
   }, [search])
@@ -105,7 +105,7 @@ export default function Professionals({ initialQuery }) {
 
   useEffect(() => {
     console.log(filters)
-    push(`${pathname}${search ? '?q=' + encodeURI(search) : ''}${filters.length > 0 ? `${search ? `&` : `?`}filter=`+encodeURI(filters) : ``}`, undefined , { shallow: true })
+    push(`${pathname}${search ? '?q=' + encodeURI(search) : ''}${filters.length > 0 ? `${search ? `&` : `?`}filter=`+encodeURI(filters as unknown as string) : ``}`, undefined , { shallow: true })
     if (search) {
       handleFetchKeyUpdate()
     }
@@ -183,7 +183,7 @@ export default function Professionals({ initialQuery }) {
 
       {checkBoxState.length > 0 && <Link href={{
           pathname: checkBoxState.length > 1 ? `/compare/${checkBoxState[0]}/${checkBoxState[1]}` : pathname + '?q=' + query?.q,
-          query: checkBoxState.length > 1 ? {q: encodeURI(filters)} : {}
+          query: checkBoxState.length > 1 ? {q: encodeURI(filters as unknown as string)} : {}
           }}>
           <a
             key={v1()}
