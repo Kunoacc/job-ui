@@ -22,7 +22,8 @@ export async function http<T>(
 }
 
 export async function get<T>(
-  path: string
+  path: string,
+  isBase: boolean = true
 ): Promise<HttpResponse<T>> {
   const args: RequestInit = {
     method: 'GET',
@@ -30,7 +31,7 @@ export async function get<T>(
     mode: 'cors'
   }
   return await http<T>(
-    new Request(BASE_PATH + path, args)
+    new Request(isBase ? BASE_PATH + path : path, args)
   )
 }
 

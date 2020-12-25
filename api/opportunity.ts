@@ -1,4 +1,3 @@
-import { ApiError } from "../interfaces/error.interface";
 import { Opportunity } from "../interfaces/opportunity.interface";
 import { ApiRequestError } from "../model/apiRequestError";
 import { get, post } from "../utils/http.util";

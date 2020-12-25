@@ -6,10 +6,9 @@ export default {
   async compareUsers({ first, second }: {
     first: string,
     second: string
-  }, skills?: []): Promise<ComparePeople>{
+  }, skills?: string[]): Promise<ComparePeople>{
     try {
-      const searchParams = new URLSearchParams(skills.map(skill => ['skill', skill]))
-      const response = await get<ComparePeople>(`compare/people/${first}/${second}${searchParams}`)
+      const response = await get<ComparePeople>(`compare/people/${first}/${second}${skills ? `?skills=${encodeURI(skills)}` : ``}`)
       return response?.parsedBody
     } catch (error) {
       throw new ApiRequestError(error)

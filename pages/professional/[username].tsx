@@ -7,50 +7,38 @@ import { Person } from "../../interfaces/person.interface";
 import { FaWeightHanging, FaTwitter, FaFacebookF, FaLinkedin, FaGithub, FaGitlab, FaInstagram, FaMedium, FaLink } from 'react-icons/fa'
 import Link from 'next/link'
 import useSWR from "swr";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { v1 } from "uuid";
 import { useRouter } from "next/router";
 import { Spinner } from "@chakra-ui/react";
 
-export default function UserDetail({ user, isNotGenerated = false }: {
+export default function UserDetail({ user }: {
   user?: Person,
-  isNotGenerated?: boolean
 }){
   const { query } = useRouter()
   const [ fetchKey, setFetchKey ] = useState(v1())
   const [ person, setPerson ] = useState(user)
-  const [ userNotGenerated, setUserNotGenerated ] = useState(isNotGenerated)
+  const [ userNotGenerated, setUserNotGenerated ] = useState(!user)
 
-  
-  const { ...obj } = useSWR( userNotGenerated ? fetchKey : null, () => api.createPerson(query?.username as string))
-  const { data, error } = obj
+  const { data, error } = useSWR( userNotGenerated ? fetchKey : null, () => api.createPerson(query?.username as string), {
+    onSuccess(data, key){
+      setPerson(data)
+      setUserNotGenerated(!userNotGenerated)
+    }
+  })
 
-  if (data) {
-    console.log(data)
-    setPerson(data)
-    setUserNotGenerated(!userNotGenerated)
-  }
+  const numberFormat = (number: number) => Intl.NumberFormat('en').format(number)
 
-  if (userNotGenerated && !data && !error) return (<div className="min-h-screen absolute w-full top-0 left-0 flex flex-col items-center justify-center bg-gray-200">
-    <Spinner></Spinner>
-    <h3 className="font-semibold text-2xl mt-4">
-      Generating
-    </h3>
-  </div>)
+  if (userNotGenerated && !data && !error) return <Generating></Generating>
 
 
-  if (error) return (<div className="min-h-screen absolute w-full top-0 left-0 flex items-center justify-center bg-gray-200">
-      <h3 className="font-normal text-2xl">
-        {error?.message}
-      </h3>
-    </div>)
-
+  if (error) return <Error error={error}></Error>
 
   return (
     <Layout>
-      <div className="bg-gray-100">
+      <div className="bg-gray-100 min-h-screen">
         <Menu className="bg-white pb-2">
-        <div className="mx-auto px-4 sm:px-6">
+          <div className="mx-auto px-4 sm:px-6">
             <div className="border-t border-gray-200 py-3">
               <nav className="flex" aria-label="Breadcrumb">
                 <div className="flex sm:hidden">
@@ -111,8 +99,9 @@ export default function UserDetail({ user, isNotGenerated = false }: {
               </nav>
             </div>
           </div>
-        
         </Menu>
+
+
         <main className="py-10">
           {/* Page header */}
           <div
@@ -173,7 +162,7 @@ export default function UserDetail({ user, isNotGenerated = false }: {
                           Job Salary Expectation
                         </dt>
                         <dd className="mt-1 text-sm text-gray-900">
-                          {person.preferredJobCompensationCurrency} {person.preferredJobCompensationAmount} / {person.preferredJobCompensationCycle}
+                          {person.preferredJobCompensationCurrency} {numberFormat(person.preferredJobCompensationAmount)} / {person.preferredJobCompensationCycle}
                         </dd>
                       </div>)}
 
@@ -182,7 +171,7 @@ export default function UserDetail({ user, isNotGenerated = false }: {
                           Gig Salary Expectation
                         </dt>
                         <dd className="mt-1 text-sm text-gray-900">
-                          {person.preferredGigCompensationCurrency} {person.preferredGigCompensationAmount} / {person.preferredGigCompensationCycle}
+                          {person.preferredGigCompensationCurrency} {numberFormat(person.preferredGigCompensationAmount)} / {person.preferredGigCompensationCycle}
                         </dd>
                       </div>)}
 
@@ -290,7 +279,7 @@ export default function UserDetail({ user, isNotGenerated = false }: {
                           {
                             person.skills.map(skill => 
                             <span className="inline-flex w-max items-center px-4 py-0.5 rounded-full text-sm font-medium bg-teal-100 text-teal-800 my-2 mx-2" key={v1()}>
-                              {skill.skill.name} &bull;  {parseInt(skill.skillWeight as unknown as string)} <FaWeightHanging className="text-xs ml-2"/>
+                              {skill?.skill?.name} &bull;  {parseInt(skill.skillWeight as unknown as string)} <FaWeightHanging className="text-xs ml-2"/>
                             </span>
                             )
                           }
@@ -306,7 +295,7 @@ export default function UserDetail({ user, isNotGenerated = false }: {
                           {
                             person.interests.map(interest => 
                             <span className="inline w-max items-center px-3 py-0.5 rounded-full text-sm font-medium bg-teal-100 text-teal-800 my-2 mx-2" key={v1()}>
-                              {interest.skill.name}
+                              {interest?.skill?.name}
                             </span>
                             )
                           }
@@ -323,6 +312,8 @@ export default function UserDetail({ user, isNotGenerated = false }: {
                 </div>
               </section>
             </div>
+
+            {/* Experiences */}
             <section aria-labelledby="timeline-title" className="lg:col-start-3 lg:col-span-1">
               <div className="bg-white px-4 py-5 shadow sm:rounded-lg sm:px-6">
                 <h2 id="timeline-title" className="text-lg font-medium text-gray-900">Experience</h2>
@@ -341,7 +332,7 @@ export default function UserDetail({ user, isNotGenerated = false }: {
                                   <pattern id={`prefix__pattern__${experience.code}`} patternContentUnits="objectBoundingBox" width="1" height="1">
                                     <use xlinkHref={`#prefix__image__${experience.code}`}></use>
                                   </pattern>
-                                  <image id={`prefix__image__${experience.code}`} href={experience.company?.logo} height="40" width="40" preserveAspectRatio="xMinYMin meet" className="object-contain"/>
+                                  <image id={`prefix__image__${experience.code}`} href={experience?.company?.logo} height="40" width="40" preserveAspectRatio="xMinYMin meet" className="object-contain"/>
                                 </defs>
                               </svg>
                             </span>
@@ -349,19 +340,18 @@ export default function UserDetail({ user, isNotGenerated = false }: {
                           <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                             <div>
                               <p className="text-sm text-gray-500 font-medium capitalize">{experience.role}</p>
-                              <p className="leading-loose text-xs font-medium">{experience.company.name} &bull; {experience.location ?? 'Remote'}</p>
+                              <p className="leading-loose text-xs font-medium">{experience?.company?.name} &bull; {experience.location ?? 'Remote'}</p>
                               <ul className="list-disc text-sm grid grid-cols-1 gap-y-2">
                                 {(JSON.parse(experience?.responsibilities ?? '[]')as []).map(responsibility => <li key={v1()}>{responsibility}</li>)}
                               </ul>
                               
                             </div>
                             <div className="text-right text-sm whitespace-nowrap text-gray-500">
-                              <time dateTime={experience.fromDate as string}>{new Date(experience.fromDate).getFullYear()}</time>
+                              {experience.fromDate && <time dateTime={experience.fromDate as string}>{new Date(experience.fromDate).getFullYear()}</time>}
                               
-                              {experience.toDate && (<>
-                                <span>&bull;</span>
-                                <time dateTime={experience.toDate as string}>{new Date(experience.toDate).getFullYear()}</time>
-                              </>)}
+                              {experience.fromDate && experience.toDate && <span>&bull;</span>}
+
+                              {experience.toDate && <time dateTime={experience.toDate as string}>{new Date(experience.toDate).getFullYear()}</time>}
                             </div>
                           </div>
                         </div>
@@ -382,7 +372,6 @@ export default function UserDetail({ user, isNotGenerated = false }: {
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   try {
-    console.log(params)
     const user = await api.getPerson(params?.username as string)
     return { 
       props: {
@@ -390,13 +379,10 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       }
     }
   } catch(error){
-    console.log(error)
     let err: ApiError = error;
     if (err?.data?.type === 'not_generated') {
       return {
-        props: {
-          isNotGenerated: true
-        }
+        props: {}
       }
     }
     return { 
@@ -404,4 +390,25 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
       notFound: true
     }
   }
+}
+
+function Generating(){
+  return (
+    <div className="min-h-screen absolute w-full top-0 left-0 flex flex-col items-center justify-center bg-gray-200">
+      <Spinner></Spinner>
+      <h3 className="font-semibold text-2xl mt-4">
+        Generating
+      </h3>
+    </div>
+  )
+}
+
+function Error( { error }){
+  return (
+    <div className="min-h-screen absolute w-full top-0 left-0 flex items-center justify-center bg-gray-200">
+      <h3 className="font-normal text-2xl">
+        {error?.message}
+      </h3>
+    </div>
+  )
 }

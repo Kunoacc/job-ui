@@ -3,7 +3,7 @@ import { Person } from "./person.interface";
 import { Interest } from "./skill.interface";
 
 export interface ComparePeople {
-  preferredIndex: string | unknown;
+  preferredIndex: string;
   compared: Record<string, PeopleComparisonData>;
 }
 

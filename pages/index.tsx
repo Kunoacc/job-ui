@@ -1,7 +1,32 @@
+import { useRouter } from "next/router";
+import { ChangeEvent, KeyboardEvent, useState } from "react";
+import { v1 } from "uuid";
 import Layout from "../components/Layout";
 import Menu from "../components/Menu";
 
 export default function Home() {
+
+  const { push } = useRouter()
+
+  const searchTypeOptions = ['Opportunities', 'Professionals']
+  const [ searchType, setSearchType ] = useState(searchTypeOptions[0])
+  const handleSearchTypeUpdate = (event: ChangeEvent<HTMLSelectElement>) => setSearchType(event.target.value)
+
+  const [ search, setSearch ] = useState('')
+  const handleSearchUpdate = (event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value)
+
+  const handleSearchEvent = (event: KeyboardEvent<HTMLFormElement>) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      push({
+        pathname: `/${searchType.toLowerCase()}`,
+        query: {
+          q: search
+        }
+      })
+    }
+  }
+
   return (
     <Layout isHome={true}>
       <div className="w-full">
@@ -26,12 +51,20 @@ export default function Home() {
                     Torre UI is a Job hub used for finding the latest and greatest oppurtunities across various fields
                     as well as finding and hiring the most skilled and seasoned professionals in all fields.
                   </p>
-                  <div className="xl:absolute mt-2 w-full transform xl:translate-x-2/3 relative">
-                    <input placeholder="Search here..."
-                      className="border-b-2 border-t border-r border-l border-gray-300 w-full focus:border-teal-500 focus:ring-teal-500 outline-none text-2xl p-3 rounded transition-all ease-in duration-150 placeholder-gray-300 mt-10" />
-                    <button
-                      className="absolute items-center justify-center px-8 py-1 border border-transparent font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 md:py-2 md:px-10 right-0 mr-3 bottom-0 mb-3 text-sm">Search</button>
-                  </div>
+                  <form onKeyPress={handleSearchEvent} className="xl:absolute w-full transform xl:translate-x-2/3 relative fles items-center mt-12">
+                    <input placeholder="Search For..."
+                      className="border-b-2 border-t border-r border-l border-gray-300 w-full focus:border-teal-500 focus:ring-teal-500 outline-none text-2xl py-3 px-5 rounded transition-all ease-in duration-150 placeholder-gray-300"
+                      onChange={handleSearchUpdate}
+                      value={search} />
+                    <div className="absolute inset-y-0 right-0 flex items-center">
+                      <label htmlFor="search_type" className="sr-only">Search Type</label>
+                      <select id="search_type" name="search_type" className="focus:ring-teal-500 focus:border-teal-500 h-full py-0 pl-2 pr-12 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-md"
+                      onChange={handleSearchTypeUpdate}
+                      value={searchType}>
+                        {searchTypeOptions.map( option => <option value={option} key={v1()}>{option}</option>)}
+                      </select>
+                    </div>
+                  </form>
                 </div>
               </main>
             </div>

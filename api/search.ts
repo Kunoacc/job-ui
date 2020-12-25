@@ -1,9 +1,9 @@
 import { OpportunitySearchApiResponse, PersonSearchApiResponse } from "../interfaces/search.interface";
 import { ApiRequestError } from "../model/apiRequestError";
-import { post } from "../utils/http.util";
+import { get, post } from "../utils/http.util";
 
 export default {
-  async searchPerson(query: string, offset: string, skills?: []): Promise<PersonSearchApiResponse>{
+  async searchPerson(query: string, offset: string, skills?: string[]): Promise<PersonSearchApiResponse>{
     try {
       const searchParams = new URLSearchParams()
       searchParams.append('offset', offset)
@@ -36,6 +36,20 @@ export default {
     } catch(error) {
       console.log(error)
       throw new ApiRequestError(error)
+    }
+  },
+
+  async loadFilterOptions(query: string, limit: number = 5){
+    try {
+      const response = await get<{
+        id: number,
+        term: string,
+        distance: number
+      }[]>(`https://torre.co/api/strengths?limit=${limit}&q=${encodeURI(query)}&context=add-opportunity&locale=en`, false)
+      return response?.parsedBody
+    } catch (error) {
+      console.log(error)
+      throw new Error('sorry, something went wrong')
     }
   }
 }

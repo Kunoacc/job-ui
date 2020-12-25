@@ -1,6 +1,7 @@
 import { Company } from "./company.interface";
 
 export interface Experience {
+  [x: string]: any;
   code: string;
   category?: string | null;
   fromDate: Date | string;

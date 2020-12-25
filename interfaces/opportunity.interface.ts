@@ -1,4 +1,5 @@
 import { Company } from "./company.interface";
+import { Person } from "./person.interface";
 import { Skills } from "./skill.interface";
 
 export interface Opportunity {
@@ -21,4 +22,8 @@ export interface Opportunity {
   companyId: number;
   company: Company;
   skills: Skills[];
+  poster: Person;
+  additionalInformation?: string
+  members?: string
+  isRemote: boolean
 }

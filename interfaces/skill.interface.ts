@@ -1,4 +1,5 @@
 export interface Skills {
+  [x: string]: any;
   id: number;
   recommendations: number | null;
   code: string;
