@@ -3,7 +3,7 @@ import { ApiRequestError } from "../model/apiRequestError";
 import { get, post } from "../utils/http.util";
 
 export default {
-  async searchPerson(query: string, offset: string, skills?: string[]): Promise<PersonSearchApiResponse>{
+  async searchPerson(query: string, offset: string, skills?: any): Promise<PersonSearchApiResponse>{
     try {
       const searchParams = new URLSearchParams()
       searchParams.append('offset', offset)
@@ -21,7 +21,7 @@ export default {
     }
   },
 
-  async searchOpportunity(query: string, offset: string, skills?: []): Promise<OpportunitySearchApiResponse>{
+  async searchOpportunity(query: string, offset: string, skills?: any): Promise<OpportunitySearchApiResponse>{
     try {
       const searchParams = new URLSearchParams()
       searchParams.append('offset', offset)

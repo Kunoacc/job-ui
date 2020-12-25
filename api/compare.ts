@@ -6,7 +6,7 @@ export default {
   async compareUsers({ first, second }: {
     first: string,
     second: string
-  }, skills?: string[]): Promise<ComparePeople>{
+  }, skills?: any): Promise<ComparePeople>{
     try {
       const response = await get<ComparePeople>(`compare/people/${first}/${second}${skills ? `?skills=${encodeURI(skills)}` : ``}`)
       return response?.parsedBody
