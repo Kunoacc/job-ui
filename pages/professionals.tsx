@@ -174,7 +174,7 @@ export default function Professionals({ initialQuery }) {
           }
         </div>
         {search && apiData && (<><p className="text-center mx-auto text-gray-500">viewing {data.length} of {total} results</p>
-        <button onClick={e => setSize(size + 1)} 
+        <button onClick={e => setSize(size + 1)}
           disabled={data.length >= total}
           className={`my-5 py-3 px-5 bg-teal-500 border-b-2 rounded-2 border-teal-700 text-white hover:bg-teal-600 hover:border-teal-900 transition-colors ease duration-150 container mx-auto text-center ${data.length < total || 'opacity-50 cursor-not-allowed'}`}>Load More </button>
           </>)}
