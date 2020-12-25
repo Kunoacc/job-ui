@@ -163,7 +163,7 @@ export default function OpportunityDetails({ opportunity }: {
                     </div>
                   </div>}
                 </div>
-                {(job.company?.profile?.summary ?? job.company?.profile?.culture).split('\n').map(info => <p className="text-sm py-1 leading-snug">{info}</p>)}
+                {(job.company?.profile?.summary ?? job.company?.profile?.culture ?? '').split('\n').map(info => <p className="text-sm py-1 leading-snug">{info}</p>)}
               </div>}
             </div>
           </div>
