@@ -27,7 +27,7 @@ export default function ComparePage({ first, second, query: initialQuery }: {
 
   const numberFormat = (number: number) => Intl.NumberFormat('en').format(number)
 
-  const { data, error } = useSWR( fetchKey, () => api.compareUsers({ first, second }, query?.q as string[] || initialQuery?.q), {
+  const { data, error } = useSWR( fetchKey, () => api.compareUsers({ first, second }, query?.q as string[]), {
     onSuccess(data, key) {
       setPersons(data)
     }

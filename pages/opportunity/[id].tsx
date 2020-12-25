@@ -159,7 +159,7 @@ export default function OpportunityDetails({ opportunity }: {
                   <p className="text-sm font-semibold capitalize text-gray-500">About {job?.company?.name}</p>
                   {job?.members && <div className="flex-shrink-0 sm:mt-0">
                     <div className="flex overflow-hidden">
-                      {(JSON.parse(job.members) as []).map(member => member?.person?.picture ? <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src={member?.person?.pictureThumbnail} alt="" /> : <></>)}
+                      {(JSON.parse(job.members)).map(member => member?.person?.picture ? <img className="inline-block h-6 w-6 rounded-full ring-2 ring-white" src={member?.person?.pictureThumbnail} alt="" /> : <></>)}
                     </div>
                   </div>}
                 </div>
