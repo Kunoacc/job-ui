@@ -59,7 +59,7 @@ export default function Professionals({ initialQuery }) {
     }
   }
 
-  const [ filters, setFilters ] = useState([])
+  const [ filters, setFilters ] = useState(null as any)
   const getFilterOptions = (input: string) => new Promise(async (resolve) => {
     const response = await api.loadFilterOptions(input)
     return resolve(response.map(filter => ({
