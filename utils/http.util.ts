@@ -2,7 +2,7 @@ interface HttpResponse<T> extends Response {
   parsedBody?: T;
 }
 
-export const BASE_PATH = process.env.NODE_ENV !== 'production' ? `http://localhost:3000/api/` : 'https://torre-api-h3q5m.ondigitalocean.app/api/'
+export const BASE_PATH = process.env.NODE_ENV !== 'production' ? `http://localhost:3000/api/` : 'https://job-api-pm3mq.ondigitalocean.app/api/'
 
 export async function http<T>(
   request: RequestInfo
